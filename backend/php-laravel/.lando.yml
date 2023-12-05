@@ -1,0 +1,5 @@
+name: php-laravel
+recipe: laravel
+config:
+  webroot: public
+  php: "8.2"
