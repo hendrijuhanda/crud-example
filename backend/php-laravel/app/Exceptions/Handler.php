@@ -2,7 +2,12 @@
 
 namespace App\Exceptions;
 
+use App\Helpers\ResponseFormatHelper;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -25,6 +30,30 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        $this->renderable(function (Throwable $e) {
+            if (Request::wantsJson()) {
+                $data = null;
+                $status = null;
+
+                if ($e instanceof ValidationException) {
+                    $data = $e->errors();
+                    $status = $e->status;
+                }
+
+                if ($e instanceof HttpException) {
+                    $status = $e->getStatusCode();
+                }
+
+                if (!$status) {
+                    $status = Response::HTTP_INTERNAL_SERVER_ERROR;
+                }
+
+                $format = ResponseFormatHelper::error($e->getMessage(), $data);
+
+                return response()->json($format, $status);
+            }
         });
     }
 }
