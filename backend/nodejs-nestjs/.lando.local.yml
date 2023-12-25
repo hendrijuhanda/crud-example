@@ -1,0 +1,15 @@
+name: nodejs-nestjs
+recipe: mean
+config:
+  node: 18
+  database: mysql
+  port: '3000'
+  command: npm run start:dev
+services:
+  appserver:
+    build_as_root:
+      - apt-get update -y && apt-get install -y lsof
+  pma:
+    type: phpmyadmin
+    hosts:
+      - database
