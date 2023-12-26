@@ -3,3 +3,11 @@ recipe: laravel
 config:
   webroot: public
   php: "8.2"
+services:
+  pma:
+    type: phpmyadmin
+    hosts:
+      - database
+proxy:
+  pma:
+    - "pma.php-laravel.lndo.site"
