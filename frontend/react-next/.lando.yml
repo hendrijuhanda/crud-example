@@ -1,0 +1,15 @@
+name: react-next
+services:
+  nginx:
+    type: nginx
+    webroot: out
+  node:
+    type: node:18
+tooling:
+  npm:
+    service: node
+  node:
+    service: node
+proxy:
+  nginx:
+    - react-next.lndo.site

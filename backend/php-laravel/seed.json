@@ -1,0 +1,16 @@
+{
+  "todos": [
+    {
+      "title": "Task 1",
+      "description": "Complete assignment by end of the day"
+    },
+    {
+      "title": "Task 2",
+      "description": "Buy groceries for the week"
+    },
+    {
+      "title": "Task 3",
+      "description": "Call John about the upcoming meeting"
+    }
+  ]
+}
