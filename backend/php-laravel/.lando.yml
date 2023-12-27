@@ -3,9 +3,10 @@ recipe: laravel
 config:
   webroot: public
   php: "8.2"
+  via: nginx
 services:
   appserver:
-    run: 
+    build:
       - php artisan key:generate
   pma:
     type: phpmyadmin

@@ -16,11 +16,11 @@ Prerequisite() {
 }
 
 Choose_Backend() {
-    echo "Choose backend:"
+    echo "Whice backend would you like to use?"
     echo "[1] Laravel (PHP)"
     echo "[2] NestJS (NodeJS)"
 
-    read -p "(1/2)?: " var
+    read -p "(1/2) " var
 
     CHOOSEN_BACKEND=$var
 
@@ -33,11 +33,11 @@ Choose_Backend() {
 }
 
 Choose_Frontend() {
-    echo "Choose frontend:"
+    echo "Whice frontend would you like to use?"
     echo "[1] Nuxt (Vue)"
     echo "[2] Next (React)"
 
-    read -p "(1/2)?: " var
+    read -p "(1/2) " var
 
     CHOOSEN_FRONTEND=$var
 
@@ -88,8 +88,8 @@ case $BACKEND in
             sed -i "s/DB_USERNAME=root/DB_USERNAME=laravel/" .env
             sed -i "s/DB_PASSWORD=/DB_PASSWORD=laravel/" .env
 
+            lando destroy -y
             lando start
-            lando composer install
             lando php artisan migrate
         )
     ;;
@@ -124,6 +124,7 @@ case $FRONTEND in
 
             sed -i "s|API_URL=|API_URL=$API_URL|" .env
 
+            lando destroy -y
             lando start
             lando npm install
             lando npm run build
@@ -136,8 +137,8 @@ echo ""
 
 echo "The system should be ready to use. Access with urls below:"
 echo ""
-echo -e "Backend Site\t: ${BACKEND_SITE}"
-echo -e "Frontend Site\t: ${FRONTEND_SITE}"
-echo -e "PHP My Admin\t: ${PMA_SITE}"
+echo -e "Backend Site\t ${BACKEND_SITE}"
+echo -e "Frontend Site\t ${FRONTEND_SITE}"
+echo -e "phpMyAdmin\t ${PMA_SITE}"
 echo ""
 echo "Enjoy!"
