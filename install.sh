@@ -1,23 +1,15 @@
 #!/bin/bash
 
 Prerequisite() {
-    DOCKER_VERSION=$(docker version -f "{{.Client.Version}}")
     LANDO_VERSION=$(lando version)
-
-    DOCKER_VERSION=${DOCKER_VERSION%%.*}
-
     LANDO_VERSION=${LANDO_VERSION%%.*}
     LANDO_VERSION=${LANDO_VERSION##"v"}
 
     REG="^[0-9]+$"
 
-    if 
-        ! [[ $DOCKER_VERSION =~ $REG ]] || 
-        ! [[ $LANDO_VERSION =~ $REG ]] || 
-        [ $DOCKER_VERSION -lt 20 ] || 
-        [ $LANDO_VERSION -lt 3 ];
+    if ! [[ $LANDO_VERSION =~ $REG ]] || [ $LANDO_VERSION -lt 3 ];
     then
-        echo -e "\x1B[31mDocker (v20~) and Lando (v3~) is required.\x1B[0m" 
+        echo -e "\x1B[31mLando version 3 or later is required.\x1B[0m" 
 
         exit 1
     fi
@@ -34,7 +26,7 @@ Choose_Backend() {
 
     while [[ $CHOOSEN_BACKEND != @(1|2) ]]
     do
-        echo "Invalid choice! Please try again."
+        echo "\x1B[31mInvalid choice! Please try again.\x1B[0m"
 
         Choose_Backend
     done
@@ -51,7 +43,7 @@ Choose_Frontend() {
 
     while [[ $CHOOSEN_FRONTEND != @(1|2) ]]
     do
-        echo "Invalid choice! Please try again."
+        echo "\x1B[31mInvalid choice! Please try again.\x1B[0m"
         
         Choose_Frontend
     done
@@ -68,7 +60,7 @@ FRONTENDS[0]="nuxt"
 FRONTENDS[1]="next"
 
 BACKEND=${BACKENDS[CHOOSEN_BACKEND-1]}
-FRONTEND=${FRONTENDS[CHOOSE_FRONTEND-1]}
+FRONTEND=${FRONTENDS[CHOOSEN_FRONTEND-1]}
 
 case $BACKEND in
 
@@ -76,9 +68,12 @@ case $BACKEND in
         echo "Build laravel ..."
 
         (
+            cp backend/seed.json backend/php-laravel/seed.json
+
             cd backend/php-laravel
 
             cp .env.example .env
+
             sed -i "s/DB_HOST=127.0.0.1/DB_HOST=database/" .env
             sed -i "s/DB_USERNAME=root/DB_USERNAME=laravel/" .env
             sed -i "s/DB_PASSWORD=/DB_PASSWORD=laravel/" .env
@@ -87,6 +82,7 @@ case $BACKEND in
             lando composer install
             lando php artisan key:generate
             lando php artisan migrate
+            lando php artisan db:seed --class=TodoSeeder
         )
     ;;
 
