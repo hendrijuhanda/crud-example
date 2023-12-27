@@ -74,6 +74,20 @@ case $BACKEND in
 
     "laravel")
         echo "Build laravel ..."
+
+        (
+            cd backend/php-laravel
+
+            cp .env.example .env
+            sed -i "s/DB_HOST=127.0.0.1/DB_HOST=database/" .env
+            sed -i "s/DB_USERNAME=root/DB_USERNAME=laravel/" .env
+            sed -i "s/DB_PASSWORD=/DB_PASSWORD=laravel/" .env
+
+            lando start
+            lando composer install
+            lando php artisan key:generate
+            lando php artisan migrate
+        )
     ;;
 
     "nestjs")
