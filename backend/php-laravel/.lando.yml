@@ -4,6 +4,9 @@ config:
   webroot: public
   php: "8.2"
 services:
+  appserver:
+    run: 
+      - php artisan key:generate
   pma:
     type: phpmyadmin
     hosts:

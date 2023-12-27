@@ -80,9 +80,7 @@ case $BACKEND in
 
             lando start
             lando composer install
-            lando php artisan key:generate
             lando php artisan migrate
-            lando php artisan db:seed --class=TodoSeeder
         )
     ;;
 
