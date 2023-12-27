@@ -40,6 +40,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        'custom-session' => [
+            'driver' => 'custom-session',
+            'provider' => 'custom-session',
+        ],
     ],
 
     /*
@@ -69,6 +74,10 @@ return [
         //     'driver' => 'database',
         //     'table' => 'users',
         // ],
+
+        'custom-session' => [
+            'driver' => 'custom-session',
+        ],
     ],
 
     /*

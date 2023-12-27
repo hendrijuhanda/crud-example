@@ -4,36 +4,38 @@ namespace Modules\Todo\Repositories;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 use Modules\Todo\Entities\Contract\TodoInterface;
 use Modules\Todo\Entities\Todo;
 use Modules\Todo\Repositories\Contract\TodoRepositoryInterface;
 
 class TodoRepository implements TodoRepositoryInterface
 {
-
     public function all(): Collection
     {
-        return Todo::all();
+        return Todo::ownedBy(Auth::id())->all();
     }
 
     public function paginated(): LengthAwarePaginator
     {
-        return Todo::paginate(request()->get('per_page'), ['*'], null, request()->get('page'));
+        return Todo::ownedBy(Auth::id())->paginate(request()->get('per_page'), ['*'], null, request()->get('page'));
     }
 
-    public function store(array $input): TodoInterface
+    public function store(array $input, $sessionId = null): TodoInterface
     {
+        $input['created_by'] = $sessionId ?? Auth::id();
+
         return Todo::create($input);
     }
 
     public function show(int $id): TodoInterface
     {
-        return Todo::findOrFail($id);
+        return Todo::ownedBy(Auth::id())->findOrFail($id);
     }
 
     public function update(array $input, int $id): TodoInterface
     {
-        $record = Todo::findOrFail($id);
+        $record = Todo::ownedBy(Auth::id())->findOrFail($id);
 
         $record->update($input);
 
@@ -42,6 +44,6 @@ class TodoRepository implements TodoRepositoryInterface
 
     public function delete(int $id): bool
     {
-        return (bool) Todo::findOrFail($id)->destroy($id);
+        return (bool) Todo::ownedBy(Auth::id())->findOrFail($id)->destroy($id);
     }
 }

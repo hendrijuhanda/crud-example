@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use App\Helpers\ResponseFormatHelper;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Request;
@@ -44,6 +45,10 @@ class Handler extends ExceptionHandler
 
                 if ($e instanceof HttpException) {
                     $status = $e->getStatusCode();
+                }
+
+                if ($e instanceof AuthenticationException) {
+                    $status = Response::HTTP_UNAUTHORIZED;
                 }
 
                 if (!$status) {

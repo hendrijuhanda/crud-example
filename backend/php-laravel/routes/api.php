@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Session\Http\Controllers\SessionController;
 use Modules\Todo\Http\Controllers\TodoController;
 
 /*
@@ -19,7 +20,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::group(['prefix' => 'todo'], function () {
+Route::get('session', [SessionController::class, 'handle'])->name('session');
+
+Route::group(['middleware' => 'auth:custom-session', 'prefix' => 'todo'], function () {
     Route::get('/', [TodoController::class, 'index'])->name('todo.index');
     Route::post('/', [TodoController::class, 'store'])->name('todo.store');
     Route::get('/{id}', [TodoController::class, 'show'])->name('todo.show');

@@ -23,6 +23,7 @@ class Todo extends Model implements TodoInterface
     protected $fillable = [
         'title',
         'description',
+        'created_by'
     ];
 
     public function getId(): int
@@ -48,5 +49,10 @@ class Todo extends Model implements TodoInterface
     public function getUpdatedAt(): Carbon
     {
         return $this->updated_at;
+    }
+
+    public function scopeOwnedBy($query, $sessionId)
+    {
+        return $query->where('created_by', $sessionId)->orWhereNull('created_by');
     }
 }

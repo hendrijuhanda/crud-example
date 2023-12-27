@@ -13,7 +13,7 @@ interface TodoRepositoryInterface
 
     public function paginated(): LengthAwarePaginator;
 
-    public function store(array $input): TodoInterface;
+    public function store(array $input, $sessionId): TodoInterface;
 
     public function show(int $id): TodoInterface;
 
