@@ -5,6 +5,8 @@ services:
     webroot: out
   node:
     type: node:18
+    ports:
+      - 3000:3000
 tooling:
   npm:
     service: node
