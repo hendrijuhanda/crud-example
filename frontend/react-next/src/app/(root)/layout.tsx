@@ -1,8 +1,8 @@
 "use client";
 
-import { NextUIProvider } from "@nextui-org/react";
-import React from "react";
+import { ReactNode } from "react";
+import AppProvider from "@/providers/app.provider";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-  return <NextUIProvider>{children}</NextUIProvider>;
+export default function Layout({ children }: { children: ReactNode }) {
+  return <AppProvider>{children}</AppProvider>;
 }

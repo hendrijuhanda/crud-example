@@ -1,14 +1,14 @@
 "use client";
 
-import { Button } from "@nextui-org/react";
-import { RiAddLine } from "@remixicon/react";
+import { TodoComponent } from "./components/todo.component";
+import ScreenWrapperComponent from "@/components/screen-wrapper.component";
 
 export default function Page() {
   return (
     <div>
-      <Button color="primary" startContent={<RiAddLine />}>
-        Click me
-      </Button>
+      <ScreenWrapperComponent>
+        <TodoComponent />
+      </ScreenWrapperComponent>
     </div>
   );
 }
