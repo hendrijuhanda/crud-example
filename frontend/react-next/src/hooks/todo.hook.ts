@@ -1,6 +1,6 @@
 import { apiClient } from "@/utils/api.util";
 import { queryTransformer } from "@/utils/query.util";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { useCallback } from "react";
 
@@ -35,11 +35,10 @@ export const useTodoById = (id: number) =>
     select: useCallback((data: AxiosResponse) => queryTransformer(data), []),
   });
 
-export const useStoreTodo = (payload: any) =>
-  useQuery({
-    queryKey: ["todo", "store", payload],
-    queryFn: () => storeTodo(payload),
-    select: useCallback((data: AxiosResponse) => queryTransformer(data), []),
+export const useStoreTodo = () =>
+  useMutation({
+    mutationKey: ["todo", "store"],
+    mutationFn: (payload: any) => storeTodo(payload),
   });
 
 export const useUpdateTodo = (payload: any) =>

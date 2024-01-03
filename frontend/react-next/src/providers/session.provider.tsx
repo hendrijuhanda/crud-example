@@ -1,6 +1,6 @@
 "use client";
 
-import ScreenLoader from "@/components/screen-loader";
+import ScreenLoader from "@/components/screen-loader.component";
 import { useSessions } from "@/hooks/session.hook";
 import { storeToken } from "@/utils/token.util";
 import { ReactNode, createContext, useEffect, useState } from "react";
@@ -34,7 +34,9 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
     if (isSuccess) {
       setStatus("valid");
 
-      if (data.status === 201) storeToken(data?.data?.data?.token);
+      if (data.response.status === 201) {
+        storeToken(data.response.data?.data?.token);
+      }
     }
   }, [isSuccess]);
 
