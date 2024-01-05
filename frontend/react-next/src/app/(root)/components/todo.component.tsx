@@ -2,6 +2,7 @@
 
 import { Todo, useStoreTodo, useTodos } from "@/hooks/todo.hook";
 import { publish, subscribe, unsubscribe } from "@/utils/event.util";
+import { notification } from "@/utils/notification.util";
 import {
   Accordion,
   AccordionItem,
@@ -15,8 +16,16 @@ import {
   Textarea,
 } from "@nextui-org/react";
 import { RiAddLine, RiCalendarLine, RiCloseLine } from "@remixicon/react";
+import { AxiosError } from "axios";
 import { format } from "date-fns";
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 interface Input {
   value: string;
@@ -24,43 +33,12 @@ interface Input {
   errorMessage: string;
 }
 
-const AddTodoComponent = () => {
-  const [isFormShown, setIsFormShown] = useState<boolean>(false);
+interface TodoFormProps {
+  mode: "add" | "edit";
+  buttonIsLoading: boolean;
+}
 
-  useEffect(() => {
-    const todoCloseFormListener = () => setIsFormShown(false);
-
-    subscribe("todo-close-form", todoCloseFormListener);
-
-    return () => {
-      unsubscribe("todo-close-form", todoCloseFormListener);
-    };
-  }, []);
-
-  return (
-    <div className="mb-4">
-      {!isFormShown ? (
-        <div className="flex justify-end">
-          <Button
-            size="sm"
-            color="primary"
-            onPress={() => setIsFormShown(true)}
-          >
-            <RiAddLine size=".875rem" /> Add New
-          </Button>
-        </div>
-      ) : (
-        <div className="pb-4">
-          <AddTodoFormComponent />
-        </div>
-      )}
-    </div>
-  );
-};
-
-const AddTodoFormComponent = () => {
-  const { mutateAsync } = useStoreTodo();
-
+const TodoFormComponent = (props: TodoFormProps) => {
   const [inputs, setInputs] = useState<Record<string, Input>>({
     title: {
       value: "",
@@ -74,114 +52,190 @@ const AddTodoFormComponent = () => {
     },
   });
 
+  const handleInputchange = useCallback(
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = event.target as
+        | HTMLInputElement
+        | HTMLTextAreaElement;
+
+      setInputs((prevState) => ({
+        ...prevState,
+        [name]: { ...prevState[name], value },
+      }));
+    },
+    [setInputs]
+  );
+
+  const validateForm = useCallback(() => {
+    const valid: boolean = Boolean(inputs.title.value);
+    const nextState: Record<string, Input> = {
+      ...inputs,
+      title: {
+        ...inputs.title,
+        isError: !inputs.title.value,
+        errorMessage: !inputs.title.value ? "Title must be filled in!" : "",
+      },
+    };
+
+    setInputs(nextState);
+
+    return { valid, nextState };
+  }, [JSON.stringify(inputs), setInputs]);
+
   const handleSubmit = useCallback(
     (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
 
-      setInputs({
-        ...inputs,
-        title: {
-          ...inputs["title"],
-          isError: !inputs["title"].value,
-          errorMessage: !inputs["title"].value ? "This field is required!" : "",
-        },
-      });
+      const { valid, nextState } = validateForm();
 
-      if (Object.keys(inputs).some((key) => inputs[key].isError)) return;
+      if (valid) {
+        const payload = {
+          title: nextState.title.value,
+          description: nextState.description.value,
+        };
 
-      const payload = {
-        title: inputs.title.value,
-        description: inputs.description.value,
-      };
-
-      mutateAsync(payload).then(() => {
-        publish("todo-stored");
-        publish("todo-close-form");
-      });
+        publish("todo-form:submit", payload);
+      }
     },
-    [inputs]
+    [validateForm]
   );
 
   return (
-    <Card>
-      <CardHeader className="flex justify-between align-middle">
-        <div>Add Item</div>
+    <form onSubmit={(event) => handleSubmit(event)}>
+      <div className="mb-4">
+        <div className="mb-2">
+          <Input
+            value={inputs.title.value}
+            label="Title"
+            size="sm"
+            name="title"
+            onChange={handleInputchange}
+            isInvalid={inputs.title.isError}
+            errorMessage={inputs.title.errorMessage}
+          />
+        </div>
 
-        <Button
-          isIconOnly
-          variant="light"
-          className="text-default-400"
-          size="sm"
-          onPress={() => publish("todo-close-form")}
-        >
-          <RiCloseLine size="1rem" />
-        </Button>
-      </CardHeader>
+        <div>
+          <Textarea
+            value={inputs.description.value}
+            label="Description"
+            size="sm"
+            name="description"
+            onChange={handleInputchange}
+            isInvalid={inputs.description.isError}
+            errorMessage={inputs.description.errorMessage}
+          />
+        </div>
+      </div>
 
-      <Divider />
-
-      <CardBody>
-        <form onSubmit={(event) => handleSubmit(event)}>
-          <div className="mb-4">
-            <div className="mb-2">
-              <Input
-                value={inputs.title.value}
-                label="Title"
-                size="sm"
-                onChange={(event) =>
-                  setInputs({
-                    ...inputs,
-                    title: { ...inputs.title, value: event.target.value },
-                  })
-                }
-                isInvalid={inputs.title.isError}
-                errorMessage={inputs.title.errorMessage}
-              />
-            </div>
-
-            <div>
-              <Textarea
-                value={inputs.description.value}
-                label="Description"
-                size="sm"
-                onChange={(event) =>
-                  setInputs({
-                    ...inputs,
-                    description: {
-                      ...inputs.description,
-                      value: event.target.value,
-                    },
-                  })
-                }
-                isInvalid={inputs.description.isError}
-                errorMessage={inputs.description.errorMessage}
-              />
-            </div>
-          </div>
-
-          <Button type="submit" size="sm" color="primary">
-            Submit
-          </Button>
-        </form>
-      </CardBody>
-    </Card>
+      <Button
+        type="submit"
+        size="sm"
+        color="primary"
+        isLoading={props.buttonIsLoading}
+      >
+        Submit
+      </Button>
+    </form>
   );
 };
 
-export const TodoComponent = ({}) => {
+const AddTodoComponent = () => {
+  const [isFormShown, setIsFormShown] = useState<boolean>(false);
+
+  const { mutateAsync, isPending } = useStoreTodo();
+
+  const handleSubmit = useCallback(
+    (data: any) => {
+      mutateAsync(data)
+        .then(() => {
+          setIsFormShown(false);
+
+          notification.success("Item is successfully created!");
+
+          publish("todo:stored");
+        })
+        .catch((e) => {
+          if (e instanceof AxiosError) {
+            notification.error(e.message);
+          } else {
+            notification.error(e);
+          }
+        });
+    },
+    [mutateAsync, setIsFormShown]
+  );
+
+  useEffect(() => {
+    const todoFormSubmitListener = (event: CustomEvent) =>
+      handleSubmit(event.detail);
+
+    subscribe("todo-form:submit", todoFormSubmitListener as EventListener);
+
+    return () => {
+      unsubscribe("todo-form:submit", todoFormSubmitListener as EventListener);
+    };
+  }, [handleSubmit]);
+
+  return (
+    <div className="mb-2">
+      {!isFormShown ? (
+        <div className="flex justify-end mb-4">
+          <Button
+            size="sm"
+            color="primary"
+            onPress={() => setIsFormShown(true)}
+          >
+            <RiAddLine size=".875rem" /> Add New
+          </Button>
+        </div>
+      ) : (
+        <div>
+          <Card>
+            <CardHeader className="flex justify-between align-middle">
+              <div>Add Item</div>
+
+              <Button
+                isIconOnly
+                variant="light"
+                className="text-default-400"
+                size="sm"
+                onPress={() => setIsFormShown(false)}
+              >
+                <RiCloseLine size="1rem" />
+              </Button>
+            </CardHeader>
+
+            <Divider />
+
+            <CardBody>
+              <TodoFormComponent mode="add" buttonIsLoading={isPending} />
+            </CardBody>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const TodoComponent = () => {
   const { data, isFetching, refetch } = useTodos({ page: 1, per_page: 9999 });
 
   const todos: Todo[] = useMemo(() => {
     return data?.data || [];
-  }, [data]);
+  }, [data?.data]);
+
+  const handleTodoStored = useCallback(() => {
+    refetch();
+  }, [refetch]);
 
   useEffect(() => {
-    const todoStoredListener = () => refetch();
+    const todoStoredListener = () => handleTodoStored();
 
-    subscribe("todo-stored", todoStoredListener);
+    subscribe("todo:stored", todoStoredListener);
 
     return () => {
-      unsubscribe("todo-stored", todoStoredListener);
+      unsubscribe("todo:stored", todoStoredListener);
     };
   }, []);
 
@@ -201,10 +255,10 @@ export const TodoComponent = ({}) => {
           }}
           className="px-0"
         >
-          {todos.map((todo, index) => (
+          {todos.map((todo) => (
             <AccordionItem
-              key={index}
-              aria-label={`todo-${index + 1}`}
+              key={todo.id}
+              aria-label={`todo-${todo.id}`}
               title={todo.title}
               subtitle={
                 <div className="text-xs text-content4">
