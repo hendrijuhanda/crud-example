@@ -19,9 +19,22 @@
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
-      to bottom,
+      to top,
       transparent,
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+}
+
+[data-sonner-toast][data-type="error"] {
+  @apply bg-danger-400 !important;
+}
+
+[data-sonner-toast][data-type="success"] {
+  @apply bg-success-400 !important;
+}
+
+[data-sonner-toast] [data-close-button="true"] {
+  @apply bg-black !important;
+  @apply text-white !important;
 }
