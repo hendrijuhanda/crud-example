@@ -122,7 +122,7 @@ case $FRONTEND in
 
             cp .env.example .env
 
-            sed -i "s|API_URL=|API_URL=$API_URL|" .env
+            sed -i "s|NEXT_PUBLIC_API_URL=|NEXT_PUBLIC_API_URL=$API_URL|" .env
 
             lando destroy -y
             lando start
