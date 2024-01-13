@@ -1,2 +1,1 @@
-# todo
-Demonstrate a simple To-Do list app with various programming language.
+Demonstrate a simple CRUD operations app with various programming stacks.
