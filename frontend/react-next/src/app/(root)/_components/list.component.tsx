@@ -4,6 +4,7 @@ import { PerpageComponent } from "./perpage.component";
 import { Button } from "@nextui-org/react";
 import { PaginationComponent } from "./pagination.component";
 import { RiAddBoxFill } from "@remixicon/react";
+import Link from "next/link";
 
 export const ListComponent: FC = () => {
   return (
@@ -15,6 +16,8 @@ export const ListComponent: FC = () => {
 
         <div>
           <Button
+            as={Link}
+            href="/create"
             color="primary"
             size="sm"
             startContent={<RiAddBoxFill size="1rem" />}

@@ -1,17 +1,23 @@
 "use client";
 
-import ScreenWrapperComponent from "@/components/screen-wrapper.component";
-import { ListComponent } from "./products/list.component";
-import { ProductProvider } from "./products/product.provider";
+import { useEffect } from "react";
+import { ListComponent } from "./_components/list.component";
+import { ProductProvider } from "./_components/product.provider";
+import { useLayoutContext } from "@/providers/layout.provider";
 
 export default function Page() {
+  const { setPageTitle, setBreadcrumbs } = useLayoutContext();
+
+  useEffect(() => {
+    setPageTitle("Main");
+    setBreadcrumbs(() => [{ label: "Main", link: undefined }]);
+  }, []);
+
   return (
     <div>
-      <ScreenWrapperComponent>
-        <ProductProvider>
-          <ListComponent />
-        </ProductProvider>
-      </ScreenWrapperComponent>
+      <ProductProvider>
+        <ListComponent />
+      </ProductProvider>
     </div>
   );
 }

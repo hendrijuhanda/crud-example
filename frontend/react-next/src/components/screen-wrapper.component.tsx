@@ -1,20 +1,16 @@
 "use client";
 
-import { ReactNode } from "react";
+import { PropsWithChildren } from "react";
 import { ScreenHeaderComponent } from "./screen-header.component";
 
 export default function ScreenWrapperComponent({
   children,
-}: {
-  children: ReactNode;
-}) {
+}: PropsWithChildren) {
   return (
     <div className="container mx-auto px-4">
-      <header className="mb-8">
-        <ScreenHeaderComponent />
-      </header>
+      <ScreenHeaderComponent />
 
-      <main>{children}</main>
+      <main className="py-8">{children}</main>
 
       <footer></footer>
     </div>
